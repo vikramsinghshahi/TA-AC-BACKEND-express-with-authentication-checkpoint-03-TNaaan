@@ -1,0 +1,78 @@
+<% include partials/header %> <% if(error){ %>
+    <div class="alert">
+      <span class="closebtn" onclick="this.parentElement.style.display='none';"
+        >&times;</span
+      >
+      <%= error %>
+    </div>
+    <% } %>
+    <main>
+      <div class="container">
+        <div class="form">
+          <h2>Register</h2>
+    
+          <form
+            action="/users/register"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              class="input_handle"
+            />
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              class="input_handle"
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              class="input_handle"
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              class="input_handle"
+            />
+            <input
+              type="number"
+              name="age"
+              placeholder="Age"
+              class="input_handle"
+            />
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone"
+              class="input_handle"
+            />
+            <input
+              type="text"
+              name="country"
+              placeholder="Country"
+              class="input_handle"
+            />
+            <div class="file_upload">
+              <label for="avatar" class="camera-btn">
+                <img src="/images/camera.png" alt="camera icon" />
+              </label>
+              <p>Choose your profile</p>
+            </div>
+            <input
+              class="image-input"
+              type="file"
+              name="profilePic"
+              placeholder="Add Profile image"
+              id="avatar"
+            />
+            <button type="submit" class="btn btn_sub">Register</button>
+          </form>
+        </div>
+      </div>
+    </main>
