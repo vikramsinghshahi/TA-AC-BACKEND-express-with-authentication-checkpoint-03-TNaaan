@@ -1,0 +1,60 @@
+<% include partials/header %> <% if(error){ %>
+    <div class="alert">
+      <span class="closebtn" onclick="this.parentElement.style.display='none';"
+        >&times;</span
+      >
+      <%= error %>
+    </div>
+    <% } %> <% if(success){ %>
+    <div class="alert">
+      <span class="closebtn" onclick="this.parentElement.style.display='none';"
+        >&times;</span
+      >
+      <%= success %>
+    </div>
+    <% } %> <% if(info){ %>
+    <div class="alert_1">
+      <span class="closebtn" onclick="this.parentElement.style.display='none';"
+        >&times;</span
+      >
+      <%= info %>
+    </div>
+    <% } %>
+    
+    <main>
+      <div class="container">
+        <div class="form">
+          <h2>Login</h2>
+          <div class="oAuth-container">
+            <div>
+              <a class="oAuth-btn oAuth-btn-google" href="/auth/google">
+                <img class="oAuth-icon" src="/images/search.png" alt="" />
+                <span>Sign In with Google</span>
+              </a>
+            </div>
+            <a class="oAuth-btn oAuth-btn-github" href="/auth/github">
+              <img class="oAuth-icon" src="/images/github.png" alt="" />
+              <span>Sign In with Github</span>
+            </a>
+          </div>
+          <form action="/users/login" method="POST">
+            <input
+              class="input_handle"
+              type="email"
+              name="email"
+              placeholder="Email"
+            />
+            <input
+              class="input_handle"
+              type="password"
+              name="password"
+              placeholder="Password"
+            />
+            <button type="submit" class="btn btn_sub">Login</button>
+          </form>
+        </div>
+        <div class="text-password">
+          <a href="/users/login/forgotpassword">Forgot Password ?</a>
+        </div>
+      </div>
+    </main>

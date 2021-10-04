@@ -1,0 +1,33 @@
+<% include partials/header %>
+
+<main>
+  <div class="container">
+    <section class="dashboard">
+      <h1>Welcome<span><%= user.name %></span></h1>
+      <% if(user.profilePic) { %>
+      <div class="profile">
+        <% if(user.profilePic.includes('http')) { %>
+        <img
+          src="<%= user.profilePic %>"
+          alt="Profile Pic"
+          class="w-full rounded-full"
+        />
+        <% } else { %>
+        <img
+          src="/uploads/<%= user.profilePic %>"
+          alt="Profile Pic"
+          class="w-full rounded-full"
+        />
+        <% } %>
+      </div>
+      <% } %>
+      <div class="button">
+        <a href="/clients/income/new" class="btn btn_primary">Add Income</a>
+        <a href="/clients/expense/new" class="btn btn_primary">Add Expense</a>
+        <a href="/clients/statementList" class="btn btn_primary"
+          >View All Records</a
+        >
+      </div>
+    </section>
+  </div>
+</main>
