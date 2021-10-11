@@ -1,0 +1,60 @@
+<% include partials/header %>
+
+<main>
+  <div class="container">
+    <section class="statement_sec">
+      <h1>
+        Savings for the Month of <%= currentMonth %>:
+        <span><%= savings %></span>
+      </h1>
+      <div class="flex_1">
+        <aside class="filter">
+          <div class="form">
+            <h2>Filter By Date</h2>
+            <form action="/clients/statementList/filterByDate" method="GET">
+              <input type="date" name="startDate" class="input_handle" />
+              <input type="date" name="endDate" class="input_handle" />
+              <button type="submit" class="btn btn_sub">Search</button>
+            </form>
+          </div>
+          <div class="form">
+            <h2>Filter By Month</h2>
+            <form action="/clients/statementList/filterByMonth" method="GET">
+              <input type="month" name="month" class="input_handle" />
+              <button type="submit" class="btn btn_sub">Search</button>
+            </form>
+          </div>
+          <div class="btn_reset">
+            <a href="/clients/statementList" class="btn btn_sub"
+              >Reset Filters</a
+            >
+          </div>
+        </aside>
+        <article class="statement">
+          <% incomes.forEach(i => { %>
+          <div class="card">
+            <h2 class="font-bold mr-5"><%= i.incname %></h2>
+            <h2 class="font-bold mr-5"><%= i.amount %></h2>
+            <a href="/income/<%= i.id %>" class="btn btn_sub">Show Details</a>
+          </div>
+
+          <% }) %> <% expenses.forEach(i => { %>
+          <div class="card">
+            <h2 class="font-bold"><%= i.expname %></h2>
+            <h2 class="font-bold"><%= i.amount %></h2>
+            <a href="/expense/<%= i.id %>" class="btn btn_sub">Show Details</a>
+          </div>
+
+          <% }) %> <% if(balance) {%>
+          <h2 class="text">
+            Savings from the Search results:
+            <span class="text-red-500"><%= balance %></span>
+          </h2>
+          <% } %> <% if((expenses.length) === 0 && (incomes.length === 0)) { %>
+          <h1 class="text-center text-3xl font-bold">No Records Available</h1>
+          <% } %>
+        </article>
+      </div>
+    </section>
+  </div>
+</main>

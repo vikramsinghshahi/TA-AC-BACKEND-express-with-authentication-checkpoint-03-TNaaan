@@ -1,0 +1,48 @@
+<% include partials/header %>
+<main>
+  <div class="container">
+    <div class="form">
+      <div>
+        <h2>Login</h2>
+        <p style="color: red"><%= error %></p>
+        <% if(success){ %>
+        <p><%= success%></p>
+        <% } %> <% if(info){ %>
+        <p style="color: rgb(5, 94, 12)"><%= info%></p>
+        <% }%>
+      </div>
+      <br />
+
+      <div class="oAuth-container">
+        <div>
+          <a class="oAuth-btn oAuth-btn-google" href="/auth/google">
+            <span>Sign In with Google</span>
+          </a>
+        </div>
+        <a class="oAuth-btn oAuth-btn-github" href="/auth/github">
+          <span>Sign In with Github</span>
+        </a>
+      </div>
+      <form action="/users/login" method="POST">
+        <input
+          class="input_handle"
+          type="email"
+          name="email"
+          placeholder="test@example.com"
+        />
+        <input
+          class="input_handle"
+          type="password"
+          name="password"
+          placeholder="Enter password..."
+        />
+        <input class="btn btn_sub" type="submit" value="Login" />
+      </form>
+      <div>
+        <a href="/users/login/forgotpassword" class="btn"
+          >Forgot password..??</a
+        >
+      </div>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,21 @@
+<% include partials/header %>
+
+<div class="container">
+  <section class="detail">
+    <h1>Expense Details Page</h1>
+    <div class="detail_content">
+      <h2><%= expense.expname %></h2>
+      <% expense.category.forEach(i => { %>
+      <h2><%= i %></h2>
+      <% }) %>
+      <h2 class="text-xl my-2"><span>Date:</span> <%= date %></h2>
+      <h2 class="text-xl my-2"><span>Amount: </span><%= expense.amount %></h2>
+      <div>
+        <a href="/expense/<%= expense.id %>/edit" class="btn btn_sub">Edit</a>
+        <a href="/expense/<%= expense.id %>/delete" class="btn btn_delete"
+          >Delete</a
+        >
+      </div>
+    </div>
+  </section>
+</div>
