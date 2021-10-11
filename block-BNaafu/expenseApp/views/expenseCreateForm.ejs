@@ -4,9 +4,11 @@
   <div class="form">
     <h2>Add Expense</h2>
     <form action="/clients/expense" method="POST">
-      <% if(info) { %>
+      <% if(error) { %>
+      <legend class="header"><%= error %></legend>
+      <% }else{ %>
       <legend class="header"><%= info %></legend>
-      <% } %>
+      <%} %>
       <input
         type="text"
         name="expname"

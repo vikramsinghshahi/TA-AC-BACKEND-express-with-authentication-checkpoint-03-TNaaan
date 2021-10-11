@@ -1,16 +1,15 @@
 var express = require('express');
-var User = require('../models/User');
-var multer = require('multer');
-var path = require('path');
-var auth = require('../middlewares/auth');
-var Income = require('../models/Income');
-var Expense = require('../models/Expense');
-var crypto = require('crypto');
-var Token = require('../models/Token');
-var nodemailer = require('nodemailer');
-var sendgridTransport = require('nodemailer-sendgrid-transport');
-var bcrypt = require('bcrypt');
 var router = express.Router();
+var nodemailer = require('nodemailer');
+var bcrypt = require('bcrypt');
+var Token = require('../models/Token');
+var crypto = require('crypto');
+
+// console.log(crypto.randomBytes(16).toString('hex'));
+
+var User = require('../models/user');
+
+var auth = require('../middlewares/auth');
 
 function randomNumber() {
   let str = '0123456789',
@@ -21,50 +20,32 @@ function randomNumber() {
   return str2;
 }
 
-var uploadPath = path.join(__dirname, '../', 'public/uploads');
-
-// Strorage for Uploaded Files
-
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
-});
-
-var upload = multer({ storage: storage });
-
 /* GET users listing. */
-
 router.get('/', (req, res, next) => {
-  User.find({}, (err, users) => {
-    if (err) return next(err);
-    res.render('users', { users });
-  });
+  console.log(req.user);
+  // res.render('users');
 });
 
-// User Registration
-
-router.get('/register', function (req, res, next) {
+router.get('/register', (req, res, next) => {
   var error = req.flash('error')[0];
-  res.render('registration', { error });
+  res.render('registerForm', { error });
 });
 
-router.post('/register', upload.single('profilePic'), (req, res, next) => {
-  req.body.profilePic = req.file.filename;
+router.post('/register', (req, res, next) => {
   User.create(req.body, (err, user) => {
-    console.log(err, user);
+    // console.log(users);
     if (err) {
       if (err.name === 'ValidationError') {
         req.flash('error', err.message);
         return res.redirect('/users/register');
       }
+
       req.flash('error', 'This email is taken');
       return res.redirect('/users/register');
       // return res.json({ err });
+      // return next(err);
     }
+
     // generate token and save
 
     var token = new Token({
@@ -72,20 +53,23 @@ router.post('/register', upload.single('profilePic'), (req, res, next) => {
       token: crypto.randomBytes(16).toString('hex'),
     });
 
+    // console.log(token);
+    //saving token into the database
     token.save(function (err) {
       if (err) {
         return res.status(500).send({ msg: err.message });
       }
-      // Send email (use credintials of SendGrid)
+
+      //send email through node mailer
       var transporter = nodemailer.createTransport({
-        service: 'Sendgrid',
+        service: 'gmail',
         auth: {
-          user: 'apikey',
-          pass: process.env.SENDGRID_APIKEY,
+          user: 'testexpressmail0@gmail.com',
+          pass: 'vikram1996',
         },
       });
       var mailOptions = {
-        from: 'vikramsinghshahi@gmail.com',
+        from: 'testexpressmail0@gmail.com',
         to: user.email,
         subject: 'Account Verification Link',
         text:
@@ -100,7 +84,8 @@ router.post('/register', upload.single('profilePic'), (req, res, next) => {
           token.token +
           '\n\nThank You!\n',
       };
-      transporter.sendMail(mailOptions, function (err) {
+
+      transporter.sendMail(mailOptions, function (err, data) {
         if (err) {
           return res.status(500).send({
             msg: 'Technical Issue!, Please click on resend to verify your Email.',
@@ -116,17 +101,22 @@ router.post('/register', upload.single('profilePic'), (req, res, next) => {
         }
       });
     });
+
+    // res.redirect('/users/login');
   });
 });
 
-// Login
 router.get('/login', (req, res, next) => {
   var error = req.flash('error')[0];
   var success = req.flash('success')[0];
   let info = req.flash('info')[0];
-  res.render('login', { error, success, info });
+  // console.log(success);
+  res.render('login.ejs', { error, success, info });
 });
 
+// router.post('/login', (req, res, next) => {
+
+// });
 router.post('/login', (req, res, next) => {
   var { email, password } = req.body;
   if (!email || !password) {
@@ -149,26 +139,30 @@ router.post('/login', (req, res, next) => {
       }
       // persist login user info
       req.session.userId = user.id;
-      res.redirect(req.session.returnTo || '/users/dashboard');
-      delete req.session.returnTo;
-      // res.redirect('/users/dashboard');
+      // res.redirect(req.session.returnTo || '/users/dashboard');
+      console.log(req.session);
+      // delete req.session.returnTo;
+      res.redirect('/users/dashboard');
     });
   });
 });
 
 //render forgot password page
+
 router.get('/login/forgotpassword', (req, res, next) => {
   let error = req.flash('error')[0];
-  let info = req.flash('info')[0];
-  res.render('forgotPassword', { error, info });
+  // let info = req.flash('info')[0];
+  res.render('forgotPassword', { error });
 });
 
 let code = randomNumber();
-// //process forgot password
+
+// process forgetpassword request
 router.post('/login/forgotpassword', (req, res, next) => {
   let { email } = req.body;
   req.body.random = code;
-  console.log(req.body.random);
+  console.log(req.body, req.body.random);
+
   User.findOneAndUpdate({ email }, req.body, (err, user) => {
     if (err) return next(err);
     console.log(user);
@@ -179,20 +173,21 @@ router.post('/login/forgotpassword', (req, res, next) => {
       );
       return res.redirect('/users/login/forgotpassword');
     }
+
     const transporter = nodemailer.createTransport({
-      service: 'Sendgrid',
+      service: 'gmail',
       auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_APIKEY,
+        user: 'testexpressmail0@gmail.com',
+        pass: 'vikram1996',
       },
     });
 
     const mailOptions = {
-      from: 'bitopanxon1@gmail.com',
+      from: 'testexpressmail0@gmail.com',
       to: email,
       subject: 'Verification Email',
       html: `<h1>${req.body.random}</h1>
-              <h2>Please Copy above 6 digit number and visit this link http://localhost:3000/users/login/resetpassword/verify </h2>`,
+                <h2>Please Copy above 6 digit number and visit this link http://localhost:4000/users/login/resetpassword/verify </h2>`,
     };
 
     transporter.sendMail(mailOptions, (err, info) => {
@@ -204,7 +199,7 @@ router.post('/login/forgotpassword', (req, res, next) => {
   });
 });
 
-// //render reset password verification code page
+//render reset password verification code page
 router.get('/login/resetpassword/verify', (req, res, next) => {
   let error = req.flash('error')[0];
   let info = req.flash('info')[0];
@@ -219,6 +214,7 @@ router.post('/login/resetpassword/verify', (req, res, next) => {
   User.findOne({ email }, (err, user) => {
     console.log(passcode, code, 'codes');
     if (err) return next(err);
+
     if (passcode == code) {
       return res.redirect('/users/login/resetpassword');
     } else {
@@ -239,7 +235,7 @@ router.post('/login/resetpassword', (req, res, next) => {
   console.log(req.body, 'reset');
   let { newPasswd1, newPasswd2 } = req.body;
   let email = req.session.email;
-  if (newPasswd1 === newPasswd2) {
+  if (newPasswd1 === newPasswd2 && newPasswd1 && newPasswd2) {
     User.findOne({ email }, (err, user) => {
       if (err) return next(user);
       bcrypt.hash(newPasswd1, 10, (err, hashed) => {
@@ -262,6 +258,7 @@ router.post('/login/resetpassword', (req, res, next) => {
 router.use(auth.loggedInUser);
 
 router.get('/dashboard', (req, res, next) => {
+  // let userId = req.session.userId;
   let userId = req.session.userId || req.session.passport.user;
   User.findOne({ _id: userId }, (err, user) => {
     if (err) return next(err);
@@ -269,9 +266,12 @@ router.get('/dashboard', (req, res, next) => {
   });
 });
 
-// Logout;
 router.get('/logout', (req, res, next) => {
-  console.log(req.session);
+  // console.log(req.session);
+  // req.session.destroy();
+  // res.clearCookie('connect.sid');
+  // res.redirect('/users/login');
+  // console.log(req.session);
   if (!req.session) {
     req.flash('error', 'You must login first');
     res.redirect('/users/login');
