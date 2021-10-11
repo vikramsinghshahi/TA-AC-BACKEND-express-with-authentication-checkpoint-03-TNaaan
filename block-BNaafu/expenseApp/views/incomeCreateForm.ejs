@@ -2,21 +2,23 @@
 
 <div class="container">
   <div class="form">
-    <h2>Add Expense</h2>
-    <form action="/clients/expense" method="POST">
-      <% if(info) { %>
+    <h2>Add Income</h2>
+    <form action="/clients/income" method="POST">
+      <% if(error) { %>
+      <legend class="header"><%= error %></legend>
+      <% } else { %>
       <legend class="header"><%= info %></legend>
-      <% } %>
+      <%} %>
       <input
         type="text"
-        name="expname"
-        placeholder="Enter Expense Name"
+        placeholder="Income Name"
+        name="incname"
         class="input_handle"
       />
       <input
         type="text"
-        placeholder="Category"
-        name="category"
+        placeholder="Source"
+        name="sources"
         class="input_handle"
       />
       <input
@@ -26,7 +28,8 @@
         class="input_handle"
       />
       <input type="date" name="date" class="input_handle" />
-      <button type="submit" class="btn btn_sub">Add Expense</button>
+
+      <button type="submit" class="btn btn_sub">Add Income</button>
     </form>
   </div>
 </div>

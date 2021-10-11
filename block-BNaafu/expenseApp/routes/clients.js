@@ -1,16 +1,21 @@
-let express = require('express');
-let router = express.Router();
+var express = require('express');
+var passport = require('passport');
+var User = require('../models/user');
+var Token = require('../models/Token');
 let Income = require('../models/Income');
 let Expense = require('../models/Expense');
-let User = require('../models/User');
 let moment = require('moment');
+var router = express.Router();
 
 router.use((req, res, next) => {
+  //   console.log(res.locals);
   let expenses = [];
   let incomes = [];
   let date = new Date();
   let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  //   console.log(firstDay);
   let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  //   console.log(lastDay);
   Expense.find(
     {
       date: {
@@ -21,6 +26,7 @@ router.use((req, res, next) => {
     },
     (err, expenses) => {
       if (err) return next(err);
+      //   console.log(expenses);
       Income.find(
         {
           date: {
@@ -30,6 +36,7 @@ router.use((req, res, next) => {
           userId: req.user.id,
         },
         (err, incomes) => {
+          //   console.log(incomes);
           if (err) return next(err);
           let sumOfExpenses = expenses.reduce(
             (acc, curr) => acc + Number(curr.amount),
@@ -42,6 +49,7 @@ router.use((req, res, next) => {
           let savings = sumOfIncomes - sumOfExpenses;
           res.locals.savings = savings;
           res.locals.balance = 0;
+          //   console.log(res.locals);
           next();
         }
       );
@@ -49,22 +57,34 @@ router.use((req, res, next) => {
   );
 });
 
+router.get('/', (req, res, next) => {
+  res.send('welcome this is clinet route');
+});
+
 //render income create form
 router.get('/income/new', (req, res, next) => {
+  let error = req.flash('error')[0];
   let info = req.flash('info')[0];
-  res.render('incomeCreateForm', { info });
+  //   console.log(info);
+  res.render('incomeCreateForm', { error, info });
 });
 
 //add income
 router.post('/income', (req, res, next) => {
+  //   console.log(req.user.id);
   req.body.userId = req.user.id;
   req.body.sources = req.body.sources
     .trim()
     .split(' ')
     .map((e) => e.toLowerCase());
   Income.create(req.body, (err, income) => {
-    if (err) return next(err);
-    console.log(income);
+    if (err) {
+      if (err.name === 'ValidationError') {
+        req.flash('error', 'Please fill all the details!!!');
+        return res.redirect('/clients/income/new');
+      }
+    }
+    // console.log(income);
     User.findByIdAndUpdate(
       req.user.id,
       { $push: { incomes: income.id } },
@@ -79,8 +99,9 @@ router.post('/income', (req, res, next) => {
 
 //render expense create form
 router.get('/expense/new', (req, res, next) => {
+  let error = req.flash('error')[0];
   let info = req.flash('info')[0];
-  res.render('expenseCreateForm', { info });
+  res.render('expenseCreateForm', { error, info });
 });
 
 //add expense
@@ -91,7 +112,12 @@ router.post('/expense', (req, res, next) => {
     .split(' ')
     .map((e) => e.toLowerCase());
   Expense.create(req.body, (err, expense) => {
-    if (err) return next(err);
+    if (err) {
+      if (err.name === 'ValidationError') {
+        req.flash('error', 'Please fill all the details!!!');
+        return res.redirect('/clients/expense/new');
+      }
+    }
     User.findByIdAndUpdate(
       req.user.id,
       { $push: { expenses: expense.id } },
@@ -109,7 +135,9 @@ let currentMonth = moment(date).format('MMMM');
 
 //render statement page(income and expense list)
 router.get('/statementList', (req, res, next) => {
+  //   console.log(res.locals);
   let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  //   console.log(firstDay);
   let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
   Expense.find(
     {
@@ -121,7 +149,7 @@ router.get('/statementList', (req, res, next) => {
     },
     (err, expenses) => {
       if (err) return next(err);
-      console.log(expenses);
+      //   console.log(expenses);
       Income.find(
         {
           date: {
@@ -132,7 +160,7 @@ router.get('/statementList', (req, res, next) => {
         },
         (err, incomes) => {
           if (err) return next(err);
-
+          //   console.log(currentMonth);
           res.render('incomeExpenseStatement', {
             expenses,
             incomes,
